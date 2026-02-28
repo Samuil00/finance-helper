@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Финансовый помощник</title>
+    <title>Финансовый помощник - Долги и Инвестиции</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -12,54 +12,83 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --primary: #0088cc;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --card-bg: white;
+            --border: #ddd;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            padding: 16px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 12px;
         }
 
         .header {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         .header h1 {
             font-size: 24px;
+            color: var(--primary);
             margin-bottom: 12px;
-            color: #0088cc;
         }
 
-        .balance {
-            font-size: 20px;
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary), #0066aa);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .balance-amount {
+            font-size: 32px;
             font-weight: bold;
-            color: #0088cc;
         }
 
         .tabs {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 12px;
+            min-width: 70px;
+            padding: 12px 8px;
             border: none;
-            background: white;
-            border-radius: 8px;
+            background: var(--card-bg);
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            color: #666;
         }
 
         .tab-btn.active {
-            background: #0088cc;
+            background: var(--primary);
             color: white;
+            box-shadow: 0 4px 10px rgba(0,136,204,0.3);
         }
 
         .tab-content {
@@ -71,204 +100,874 @@
         }
 
         .section {
-            background: white;
+            background: var(--card-bg);
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         .section h2 {
             font-size: 18px;
             margin-bottom: 16px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        input, select, button {
+        .section h2:before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        input, select, textarea {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,136,204,0.1);
+            background: white;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,136,204,0.2);
+        }
+
+        .btn-primary:hover {
+            background: #006699;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,136,204,0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .distribution-sliders {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .slider-item {
+            margin-bottom: 16px;
+        }
+
+        .slider-item label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .slider-item input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            -webkit-appearance: none;
+            padding: 0;
+        }
+
+        .slider-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,136,204,0.3);
+        }
+
+        .debt-item, .invest-item {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .debt-header, .invest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+        }
+
+        .debt-name, .invest-name {
+            font-weight: 600;
             font-size: 16px;
         }
 
-        button {
-            background: #0088cc;
-            color: white;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
+        .debt-amount {
+            color: var(--danger);
+            font-weight: 700;
         }
 
-        button:hover {
-            background: #006699;
+        .invest-amount {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .debt-details, .invest-details {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            transition: width 0.3s;
+        }
+
+        .debt-actions, .invest-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .debt-actions button, .invest-actions button {
+            flex: 1;
+            padding: 10px;
+            font-size: 13px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .forecast-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+        }
+
+        .forecast-card .big-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(0,136,204,0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 8px 0;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .profit {
+            color: var(--success);
+        }
+
+        .loss {
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 14px;
+            border-radius: 30px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(76,175,80,0.1);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(244,67,54,0.1);
+            color: var(--danger);
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>💰 Финансовый помощник</h1>
-        <div class="balance">Баланс: <span id="balance">0 ₽</span></div>
+        <div class="balance-card">
+            <div class="balance-label">Ваш баланс</div>
+            <div class="balance-amount" id="balance">0 ₽</div>
+        </div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('income')">Доходы</button>
-        <button class="tab-btn" onclick="showTab('debts')">Долги</button>
-        <button class="tab-btn" onclick="showTab('investments')">Инвестиции</button>
+        <button class="tab-btn active" onclick="showTab('income')">💰 Доходы</button>
+        <button class="tab-btn" onclick="showTab('debts')">📋 Долги</button>
+        <button class="tab-btn" onclick="showTab('investments')">📈 Инвестиции</button>
+        <button class="tab-btn" onclick="showTab('stats')">📊 Статистика</button>
     </div>
 
-    <!-- Вкладка Доходы -->
+    <!-- ВКЛАДКА ДОХОДЫ -->
     <div id="income-tab" class="tab-content active">
         <div class="section">
-            <h2>Добавить доход</h2>
-            <input type="number" id="income-amount" placeholder="Сумма">
+            <h2>➕ Добавить доход</h2>
+            <input type="number" id="income-amount" placeholder="Сумма дохода" min="0" step="100">
             <select id="income-period">
                 <option value="daily">Ежедневно</option>
+                <option value="weekly">Еженедельно</option>
                 <option value="monthly">Ежемесячно</option>
+                <option value="yearly">Ежегодно</option>
             </select>
-            <button onclick="addIncome()">Добавить доход</button>
+            <input type="text" id="income-source" placeholder="Источник дохода (необязательно)">
+            <button class="btn btn-primary" onclick="addIncome()">✅ Добавить доход</button>
         </div>
 
         <div class="section">
-            <h2>Как распределить</h2>
-            <p>Долги: <span id="debt-percent">30</span>%</p>
-            <p>Расходы: <span id="expenses-percent">40</span>%</p>
-            <p>Инвестиции: <span id="invest-percent">30</span>%</p>
-            <button onclick="updateDistribution()">Применить распределение</button>
+            <h2>⚙️ Настройка распределения</h2>
+            <div class="distribution-sliders">
+                <div class="slider-item">
+                    <label>
+                        <span>📋 Долги</span>
+                        <span id="debt-percent">30</span>%
+                    </label>
+                    <input type="range" id="debt-slider" min="0" max="100" value="30" oninput="updateDistributionSliders()">
+                </div>
+                <div class="slider-item">
+                    <label>
+                        <span>🛒 Расходы</span>
+                        <span id="expenses-percent">40</span>%
+                    </label>
+                    <input type="range" id="expenses-slider" min="0" max="100" value="40" oninput="updateDistributionSliders()">
+                </div>
+                <div class="slider-item">
+                    <label>
+                        <span>📈 Инвестиции</span>
+                        <span id="invest-percent">30</span>%
+                    </label>
+                    <input type="range" id="invest-slider" min="0" max="100" value="30" oninput="updateDistributionSliders()">
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="saveDistribution()">💾 Сохранить распределение</button>
+        </div>
+
+        <div class="section">
+            <h2>📊 Текущие расходы</h2>
+            <div id="expenses-list" class="empty-state">Нет расходов за последнее время</div>
         </div>
     </div>
 
-    <!-- Вкладка Долги -->
+    <!-- ВКЛАДКА ДОЛГИ -->
     <div id="debts-tab" class="tab-content">
         <div class="section">
-            <h2>Добавить долг</h2>
-            <input type="text" id="debt-name" placeholder="Кому должны">
-            <input type="number" id="debt-amount" placeholder="Сумма долга">
-            <button onclick="addDebt()">Добавить долг</button>
+            <h2>➕ Добавить долг</h2>
+            <input type="text" id="debt-name" placeholder="Кому должны / Название">
+            <input type="number" id="debt-amount" placeholder="Сумма долга" min="0">
+            <input type="number" id="debt-interest" placeholder="Процентная ставка % (если есть)" min="0" step="0.1">
+            <input type="date" id="debt-deadline">
+            <select id="debt-priority">
+                <option value="high">🔴 Высокий приоритет</option>
+                <option value="medium" selected>🟡 Средний приоритет</option>
+                <option value="low">🟢 Низкий приоритет</option>
+            </select>
+            <button class="btn btn-primary" onclick="addDebt()">➕ Добавить долг</button>
         </div>
 
         <div class="section">
-            <h2>Список долгов</h2>
-            <div id="debts-list">Нет долгов</div>
+            <h2>📋 Список долгов</h2>
+            <div id="debts-list"></div>
+        </div>
+
+        <div class="section">
+            <h2>⏱️ Прогноз погашения</h2>
+            <div id="repayment-forecast" class="forecast-card">
+                <div>Добавьте долги для расчета</div>
+            </div>
         </div>
     </div>
 
-    <!-- Вкладка Инвестиции -->
+    <!-- ВКЛАДКА ИНВЕСТИЦИИ -->
     <div id="investments-tab" class="tab-content">
         <div class="section">
-            <h2>Добавить инвестицию</h2>
-            <input type="text" id="invest-name" placeholder="Название">
-            <input type="number" id="invest-amount" placeholder="Сумма">
-            <button onclick="addInvestment()">Добавить</button>
+            <h2>➕ Добавить инвестицию</h2>
+            <input type="text" id="invest-name" placeholder="Название инвестиции">
+            <input type="number" id="invest-amount" placeholder="Сумма инвестиций" min="0">
+            <input type="number" id="invest-return" placeholder="Ожидаемая доходность % в год" min="0" step="0.1">
+            <select id="invest-risk">
+                <option value="low">🟢 Низкий риск</option>
+                <option value="medium" selected>🟡 Средний риск</option>
+                <option value="high">🔴 Высокий риск</option>
+            </select>
+            <select id="invest-type">
+                <option value="stocks">Акции</option>
+                <option value="bonds">Облигации</option>
+                <option value="realty">Недвижимость</option>
+                <option value="crypto">Криптовалюта</option>
+                <option value="other">Другое</option>
+            </select>
+            <button class="btn btn-primary" onclick="addInvestment()">➕ Добавить инвестицию</button>
         </div>
 
         <div class="section">
-            <h2>Мои инвестиции</h2>
-            <div id="investments-list">Нет инвестиций</div>
+            <h2>📊 Портфель инвестиций</h2>
+            <div id="investments-list"></div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Прогноз доходности</h2>
+            <div id="invest-forecast" class="forecast-card">
+                <div>Добавьте инвестиции для расчета</div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Переключение вкладок
-        function showTab(tabName) {
-            // Скрываем все вкладки
-            document.getElementById('income-tab').classList.remove('active');
-            document.getElementById('debts-tab').classList.remove('active');
-            document.getElementById('investments-tab').classList.remove('active');
-            
-            // Убираем активный класс у всех кнопок
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Показываем нужную вкладку
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // Делаем активной нажатую кнопку
-            event.target.classList.add('active');
-        }
+    <!-- ВКЛАДКА СТАТИСТИКА -->
+    <div id="stats-tab" class="tab-content">
+        <div class="section">
+            <h2>📊 Общая статистика</h2>
+            <div class="stats-grid" id="stats-grid"></div>
+        </div>
 
-        // Сохраняем данные
+        <div class="section">
+            <h2>💰 Финансовые показатели</h2>
+            <div id="financial-metrics"></div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Советы</h2>
+            <div id="tips" class="forecast-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                Загружаем советы...
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Глобальные переменные
         let balance = 0;
+        let incomes = [];
         let debts = [];
         let investments = [];
+        let expenses = [];
         let distribution = {
             debts: 30,
             expenses: 40,
             investments: 30
         };
 
-        // Обновление баланса
-        function updateBalance() {
-            document.getElementById('balance').textContent = balance + ' ₽';
+        // Загрузка данных из localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('financeData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    balance = data.balance || 0;
+                    incomes = data.incomes || [];
+                    debts = data.debts || [];
+                    investments = data.investments || [];
+                    expenses = data.expenses || [];
+                    distribution = data.distribution || distribution;
+                    
+                    // Обновляем слайдеры
+                    document.getElementById('debt-slider').value = distribution.debts;
+                    document.getElementById('expenses-slider').value = distribution.expenses;
+                    document.getElementById('invest-slider').value = distribution.investments;
+                    
+                    updateDistributionSliders();
+                } catch (e) {
+                    console.error('Ошибка загрузки данных', e);
+                }
+            }
+        }
+
+        // Сохранение данных
+        function saveData() {
+            const data = {
+                balance,
+                incomes,
+                debts,
+                investments,
+                expenses,
+                distribution
+            };
+            localStorage.setItem('financeData', JSON.stringify(data));
+        }
+
+        // Показать уведомление
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            toast.style.background = type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#333';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
         }
 
         // Форматирование денег
         function formatMoney(amount) {
-            return amount + ' ₽';
+            return new Intl.NumberFormat('ru-RU', {
+                style: 'currency',
+                currency: 'RUB',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            if (!dateString) return 'Не указана';
+            return new Date(dateString).toLocaleDateString('ru-RU');
+        }
+
+        // Обновление баланса
+        function updateBalance() {
+            document.getElementById('balance').textContent = formatMoney(balance);
+        }
+
+        // Переключение вкладок
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Обновляем данные при переключении
+            if (tabName === 'debts') {
+                updateDebtsList();
+                updateRepaymentForecast();
+            } else if (tabName === 'investments') {
+                updateInvestmentsList();
+                updateInvestForecast();
+            } else if (tabName === 'stats') {
+                updateStats();
+                updateTips();
+            }
+        }
+
+        // Обновление слайдеров
+        function updateDistributionSliders() {
+            const debt = parseInt(document.getElementById('debt-slider').value);
+            const expenses = parseInt(document.getElementById('expenses-slider').value);
+            const invest = parseInt(document.getElementById('invest-slider').value);
+            
+            const total = debt + expenses + invest;
+            
+            if (total !== 100) {
+                const diff = 100 - total;
+                if (event && event.target === document.getElementById('debt-slider')) {
+                    document.getElementById('expenses-slider').value = Math.max(0, expenses + diff/2);
+                    document.getElementById('invest-slider').value = Math.max(0, 100 - debt - parseInt(document.getElementById('expenses-slider').value));
+                } else if (event && event.target === document.getElementById('expenses-slider')) {
+                    document.getElementById('debt-slider').value = Math.max(0, debt + diff/2);
+                    document.getElementById('invest-slider').value = Math.max(0, 100 - expenses - parseInt(document.getElementById('debt-slider').value));
+                } else {
+                    document.getElementById('debt-slider').value = Math.max(0, debt + diff/2);
+                    document.getElementById('expenses-slider').value = Math.max(0, 100 - invest - parseInt(document.getElementById('debt-slider').value));
+                }
+            }
+            
+            document.getElementById('debt-percent').textContent = document.getElementById('debt-slider').value;
+            document.getElementById('expenses-percent').textContent = document.getElementById('expenses-slider').value;
+            document.getElementById('invest-percent').textContent = document.getElementById('invest-slider').value;
+        }
+
+        // Сохранение распределения
+        function saveDistribution() {
+            distribution = {
+                debts: parseInt(document.getElementById('debt-slider').value),
+                expenses: parseInt(document.getElementById('expenses-slider').value),
+                investments: parseInt(document.getElementById('invest-slider').value)
+            };
+            saveData();
+            showToast('Распределение сохранено!', 'success');
         }
 
         // Добавление дохода
         function addIncome() {
-            let amount = document.getElementById('income-amount').value;
-            let period = document.getElementById('income-period').value;
+            const amount = parseFloat(document.getElementById('income-amount').value);
+            const period = document.getElementById('income-period').value;
+            const source = document.getElementById('income-source').value || 'Доход';
             
-            if (amount && amount > 0) {
-                balance = balance + Number(amount);
-                updateBalance();
-                document.getElementById('income-amount').value = '';
-                alert('Доход добавлен!');
-            } else {
-                alert('Введите сумму');
+            if (!amount || amount <= 0) {
+                showToast('Введите корректную сумму', 'error');
+                return;
+            }
+            
+            const income = {
+                id: Date.now(),
+                amount,
+                period,
+                source,
+                date: new Date().toISOString()
+            };
+            
+            incomes.push(income);
+            balance += amount;
+            
+            // Распределяем доход
+            distributeIncome(amount);
+            
+            updateBalance();
+            saveData();
+            showToast('Доход добавлен и распределен!', 'success');
+            
+            document.getElementById('income-amount').value = '';
+            document.getElementById('income-source').value = '';
+        }
+
+        // Распределение дохода
+        function distributeIncome(amount) {
+            const debtAmount = (amount * distribution.debts) / 100;
+            const expensesAmount = (amount * distribution.expenses) / 100;
+            const investAmount = (amount * distribution.investments) / 100;
+            
+            // Платим по долгам
+            if (debtAmount > 0 && debts.length > 0) {
+                payDebtsAutomatically(debtAmount);
+            }
+            
+            // Добавляем расходы
+            if (expensesAmount > 0) {
+                addExpense('Автоматические расходы', expensesAmount);
+            }
+            
+            // Инвестируем
+            if (investAmount > 0 && investments.length > 0) {
+                addToInvestments(investAmount);
+            }
+            
+            updateExpensesList();
+        }
+
+        // Автоматическая оплата долгов
+        function payDebtsAutomatically(amount) {
+            let remaining = amount;
+            
+            // Сортируем долги по приоритету и сроку
+            const sortedDebts = [...debts].sort((a, b) => {
+                const priorityWeight = { high: 3, medium: 2, low: 1 };
+                return (priorityWeight[b.priority] - priorityWeight[a.priority]) || 
+                       (new Date(a.deadline) - new Date(b.deadline));
+            });
+            
+            for (let debt of sortedDebts) {
+                if (remaining <= 0) break;
+                
+                const payment = Math.min(remaining, debt.remaining);
+                debt.remaining -= payment;
+                remaining -= payment;
+                
+                if (debt.remaining <= 0) {
+                    debts = debts.filter(d => d.id !== debt.id);
+                }
             }
         }
 
-        // Обновление распределения
-        function updateDistribution() {
-            // Здесь пока просто показываем текущие проценты
-            alert('Распределение сохранено');
+        // Добавление расхода
+        function addExpense(name, amount) {
+            const expense = {
+                id: Date.now(),
+                name,
+                amount,
+                date: new Date().toISOString()
+            };
+            expenses.push(expense);
+            
+            // Оставляем только последние 50 расходов
+            if (expenses.length > 50) {
+                expenses = expenses.slice(-50);
+            }
+        }
+
+        // Добавление к инвестициям
+        function addToInvestments(amount) {
+            if (investments.length === 0) return;
+            
+            // Распределяем пропорционально
+            const total = investments.reduce((sum, inv) => sum + inv.amount, 0);
+            
+            for (let inv of investments) {
+                const percentage = inv.amount / total;
+                inv.currentValue = (inv.currentValue || inv.amount) + (amount * percentage);
+            }
         }
 
         // Добавление долга
         function addDebt() {
-            let name = document.getElementById('debt-name').value;
-            let amount = document.getElementById('debt-amount').value;
+            const name = document.getElementById('debt-name').value;
+            const amount = parseFloat(document.getElementById('debt-amount').value);
+            const interest = parseFloat(document.getElementById('debt-interest').value) || 0;
+            const deadline = document.getElementById('debt-deadline').value;
+            const priority = document.getElementById('debt-priority').value;
             
-            if (name && amount && amount > 0) {
-                let debt = {
-                    id: Date.now(),
-                    name: name,
-                    amount: Number(amount),
-                    remaining: Number(amount)
-                };
-                
-                debts.push(debt);
-                updateDebtsList();
-                
-                document.getElementById('debt-name').value = '';
-                document.getElementById('debt-amount').value = '';
-            } else {
-                alert('Заполните все поля');
+            if (!name || !amount || amount <= 0) {
+                showToast('Заполните все поля', 'error');
+                return;
             }
+            
+            const debt = {
+                id: Date.now(),
+                name,
+                amount,
+                remaining: amount,
+                interest,
+                deadline,
+                priority,
+                date: new Date().toISOString()
+            };
+            
+            debts.push(debt);
+            saveData();
+            updateDebtsList();
+            updateRepaymentForecast();
+            showToast('Долг добавлен!', 'success');
+            
+            document.getElementById('debt-name').value = '';
+            document.getElementById('debt-amount').value = '';
+            document.getElementById('debt-interest').value = '';
+            document.getElementById('debt-deadline').value = '';
+        }
+
+        // Добавление инвестиции
+        function addInvestment() {
+            const name = document.getElementById('invest-name').value;
+            const amount = parseFloat(document.getElementById('invest-amount').value);
+            const expectedReturn = parseFloat(document.getElementById('invest-return').value) || 0;
+            const risk = document.getElementById('invest-risk').value;
+            const type = document.getElementById('invest-type').value;
+            
+            if (!name || !amount || amount <= 0) {
+                showToast('Заполните все поля', 'error');
+                return;
+            }
+            
+            const investment = {
+                id: Date.now(),
+                name,
+                amount,
+                currentValue: amount,
+                expectedReturn,
+                risk,
+                type,
+                date: new Date().toISOString()
+            };
+            
+            investments.push(investment);
+            saveData();
+            updateInvestmentsList();
+            updateInvestForecast();
+            showToast('Инвестиция добавлена!', 'success');
+            
+            document.getElementById('invest-name').value = '';
+            document.getElementById('invest-amount').value = '';
+            document.getElementById('invest-return').value = '';
+        }
+
+        // Обновление списка расходов
+        function updateExpensesList() {
+            const list = document.getElementById('expenses-list');
+            const recent = expenses.slice(-5).reverse();
+            
+            if (recent.length === 0) {
+                list.innerHTML = '<div class="empty-state">Нет расходов за последнее время</div>';
+                return;
+            }
+            
+            let html = '';
+            for (let exp of recent) {
+                html += `
+                    <div class="debt-item" style="border-left-color: var(--warning);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: 500;">${exp.name}</span>
+                            <span style="color: var(--warning); font-weight: 600;">${formatMoney(exp.amount)}</span>
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            ${new Date(exp.date).toLocaleString('ru-RU')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html;
         }
 
         // Обновление списка долгов
         function updateDebtsList() {
-            let list = document.getElementById('debts-list');
+            const list = document.getElementById('debts-list');
             
             if (debts.length === 0) {
-                list.innerHTML = 'Нет долгов';
+                list.innerHTML = '<div class="empty-state">Нет активных долгов</div>';
                 return;
             }
             
             let html = '';
             for (let debt of debts) {
-                html += '<div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">';
-                html += '<p><strong>' + debt.name + '</strong></p>';
-                html += '<p>Долг: ' + formatMoney(debt.remaining) + '</p>';
-                html += '<button onclick="payDebt(' + debt.id + ')">Оплатить</button> ';
-                html += '<button onclick="deleteDebt(' + debt.id + ')" style="background:#f44336;">Удалить</button>';
-                html += '</div>';
+                const paid = ((debt.amount - debt.remaining) / debt.amount * 100).toFixed(1);
+                const priorityColor = debt.priority === 'high' ? 'var(--danger)' : debt.priority === 'medium' ? 'var(--warning)' : 'var(--success)';
+                
+                html += `
+                    <div class="debt-item" style="border-left-color: ${priorityColor};">
+                        <div class="debt-header">
+                            <span class="debt-name">${debt.name}</span>
+                            <span class="debt-amount">${formatMoney(debt.remaining)}</span>
+                        </div>
+                        <div class="debt-details">
+                            <span class="badge ${debt.priority === 'high' ? 'badge-danger' : debt.priority === 'medium' ? 'badge-warning' : 'badge-success'}">
+                                ${debt.priority === 'high' ? '🔴 Высокий' : debt.priority === 'medium' ? '🟡 Средний' : '🟢 Низкий'}
+                            </span>
+                            <span>💰 Всего: ${formatMoney(debt.amount)}</span>
+                            ${debt.interest ? `<span>📊 ${debt.interest}%</span>` : ''}
+                            ${debt.deadline ? `<span>📅 ${formatDate(debt.deadline)}</span>` : ''}
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${paid}%"></div>
+                        </div>
+                        <div class="debt-actions">
+                            <button class="btn-success" onclick="payDebt(${debt.id})">💰 Оплатить</button>
+                            <button class="btn-danger" onclick="deleteDebt(${debt.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html;
+        }
+
+        // Обновление списка инвестиций
+        function updateInvestmentsList() {
+            const list = document.getElementById('investments-list');
+            
+            if (investments.length === 0) {
+                list.innerHTML = '<div class="empty-state">Нет активных инвестиций</div>';
+                return;
+            }
+            
+            let html = '';
+            for (let inv of investments) {
+                const profit = inv.currentValue - inv.amount;
+                const profitPercent = ((profit / inv.amount) * 100).toFixed(1);
+                const riskColor = inv.risk === 'low' ? 'var(--success)' : inv.risk === 'medium' ? 'var(--warning)' : 'var(--danger)';
+                
+                html += `
+                    <div class="invest-item" style="border-left-color: ${riskColor};">
+                        <div class="invest-header">
+                            <span class="invest-name">${inv.name}</span>
+                            <span class="invest-amount ${profit >= 0 ? 'profit' : 'loss'}">
+                                ${profit >= 0 ? '+' : ''}${formatMoney(profit)}
+                            </span>
+                        </div>
+                        <div class="invest-details">
+                            <span>💰 Инвест: ${formatMoney(inv.amount)}</span>
+                            <span>📈 Текущ: ${formatMoney(inv.currentValue)}</span>
+                            <span class="${profit >= 0 ? 'profit' : 'loss'}">${profitPercent}%</span>
+                        </div>
+                        <div class="invest-details">
+                            <span>🎯 ${inv.expectedReturn}% годовых</span>
+                            <span>${inv.type === 'stocks' ? '📊 Акции' : inv.type === 'bonds' ? '📋 Облигации' : inv.type === 'realty' ? '🏠 Недвижимость' : inv.type === 'crypto' ? '₿ Крипто' : '💼 Другое'}</span>
+                        </div>
+                        <div class="invest-actions">
+                            <button class="btn-success" onclick="updateInvestmentValue(${inv.id})">📈 Обновить</button>
+                            <button class="btn-danger" onclick="deleteInvestment(${inv.id})">🗑️ Удалить</button>
+                        </div>
+                    </div>
+                `;
             }
             
             list.innerHTML = html;
@@ -276,83 +975,42 @@
 
         // Оплата долга
         function payDebt(id) {
-            let amount = prompt('Сколько платим?');
-            if (amount && amount > 0) {
-                for (let i = 0; i < debts.length; i++) {
-                    if (debts[i].id === id) {
-                        debts[i].remaining -= Number(amount);
-                        balance -= Number(amount);
-                        
-                        if (debts[i].remaining <= 0) {
-                            debts.splice(i, 1);
-                        }
-                        
-                        updateBalance();
-                        updateDebtsList();
-                        break;
-                    }
-                }
+            const amount = prompt('Введите сумму платежа:');
+            if (!amount) return;
+            
+            const payment = parseFloat(amount);
+            if (isNaN(payment) || payment <= 0) {
+                showToast('Введите корректную сумму', 'error');
+                return;
             }
+            
+            const debtIndex = debts.findIndex(d => d.id === id);
+            if (debtIndex === -1) return;
+            
+            if (payment > debts[debtIndex].remaining) {
+                showToast('Сумма превышает остаток долга', 'error');
+                return;
+            }
+            
+            debts[debtIndex].remaining -= payment;
+            balance -= payment;
+            
+            if (debts[debtIndex].remaining <= 0) {
+                debts.splice(debtIndex, 1);
+            }
+            
+            addExpense(`Платеж по долгу`, payment);
+            
+            updateBalance();
+            updateDebtsList();
+            updateRepaymentForecast();
+            saveData();
+            showToast('Платеж выполнен!', 'success');
         }
 
         // Удаление долга
         function deleteDebt(id) {
-            debts = debts.filter(debt => debt.id !== id);
-            updateDebtsList();
-        }
-
-        // Добавление инвестиции
-        function addInvestment() {
-            let name = document.getElementById('invest-name').value;
-            let amount = document.getElementById('invest-amount').value;
-            
-            if (name && amount && amount > 0) {
-                let invest = {
-                    id: Date.now(),
-                    name: name,
-                    amount: Number(amount)
-                };
-                
-                investments.push(invest);
-                updateInvestmentsList();
-                
-                document.getElementById('invest-name').value = '';
-                document.getElementById('invest-amount').value = '';
-            } else {
-                alert('Заполните все поля');
-            }
-        }
-
-        // Обновление списка инвестиций
-        function updateInvestmentsList() {
-            let list = document.getElementById('investments-list');
-            
-            if (investments.length === 0) {
-                list.innerHTML = 'Нет инвестиций';
-                return;
-            }
-            
-            let html = '';
-            for (let inv of investments) {
-                html += '<div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">';
-                html += '<p><strong>' + inv.name + '</strong></p>';
-                html += '<p>Сумма: ' + formatMoney(inv.amount) + '</p>';
-                html += '<button onclick="deleteInvestment(' + inv.id + ')" style="background:#f44336;">Удалить</button>';
-                html += '</div>';
-            }
-            
-            list.innerHTML = html;
-        }
-
-        // Удаление инвестиции
-        function deleteInvestment(id) {
-            investments = investments.filter(inv => inv.id !== id);
-            updateInvestmentsList();
-        }
-
-        // Telegram Web App
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-    </script>
-</body>
-</html>
+            if (confirm('Удалить долг?')) {
+                debts = debts.filter(d => d.id !== id);
+                updateDebtsList();
+                updateRepaymentForecast();

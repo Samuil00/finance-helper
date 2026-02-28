@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Финансовый помощник</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 16px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #0088cc;
+        }
+
+        .balance {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0088cc;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn.active {
+            background: #0088cc;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #0088cc;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #006699;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💰 Финансовый помощник</h1>
+        <div class="balance">Баланс: <span id="balance">0 ₽</span></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('income')">Доходы</button>
+        <button class="tab-btn" onclick="showTab('debts')">Долги</button>
+        <button class="tab-btn" onclick="showTab('investments')">Инвестиции</button>
+    </div>
+
+    <!-- Вкладка Доходы -->
+    <div id="income-tab" class="tab-content active">
+        <div class="section">
+            <h2>Добавить доход</h2>
+            <input type="number" id="income-amount" placeholder="Сумма">
+            <select id="income-period">
+                <option value="daily">Ежедневно</option>
+                <option value="monthly">Ежемесячно</option>
+            </select>
+            <button onclick="addIncome()">Добавить доход</button>
+        </div>
+
+        <div class="section">
+            <h2>Как распределить</h2>
+            <p>Долги: <span id="debt-percent">30</span>%</p>
+            <p>Расходы: <span id="expenses-percent">40</span>%</p>
+            <p>Инвестиции: <span id="invest-percent">30</span>%</p>
+            <button onclick="updateDistribution()">Применить распределение</button>
+        </div>
+    </div>
+
+    <!-- Вкладка Долги -->
+    <div id="debts-tab" class="tab-content">
+        <div class="section">
+            <h2>Добавить долг</h2>
+            <input type="text" id="debt-name" placeholder="Кому должны">
+            <input type="number" id="debt-amount" placeholder="Сумма долга">
+            <button onclick="addDebt()">Добавить долг</button>
+        </div>
+
+        <div class="section">
+            <h2>Список долгов</h2>
+            <div id="debts-list">Нет долгов</div>
+        </div>
+    </div>
+
+    <!-- Вкладка Инвестиции -->
+    <div id="investments-tab" class="tab-content">
+        <div class="section">
+            <h2>Добавить инвестицию</h2>
+            <input type="text" id="invest-name" placeholder="Название">
+            <input type="number" id="invest-amount" placeholder="Сумма">
+            <button onclick="addInvestment()">Добавить</button>
+        </div>
+
+        <div class="section">
+            <h2>Мои инвестиции</h2>
+            <div id="investments-list">Нет инвестиций</div>
+        </div>
+    </div>
+
+    <script>
+        // Переключение вкладок
+        function showTab(tabName) {
+            // Скрываем все вкладки
+            document.getElementById('income-tab').classList.remove('active');
+            document.getElementById('debts-tab').classList.remove('active');
+            document.getElementById('investments-tab').classList.remove('active');
+            
+            // Убираем активный класс у всех кнопок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показываем нужную вкладку
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Делаем активной нажатую кнопку
+            event.target.classList.add('active');
+        }
+
+        // Сохраняем данные
+        let balance = 0;
+        let debts = [];
+        let investments = [];
+        let distribution = {
+            debts: 30,
+            expenses: 40,
+            investments: 30
+        };
+
+        // Обновление баланса
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance + ' ₽';
+        }
+
+        // Форматирование денег
+        function formatMoney(amount) {
+            return amount + ' ₽';
+        }
+
+        // Добавление дохода
+        function addIncome() {
+            let amount = document.getElementById('income-amount').value;
+            let period = document.getElementById('income-period').value;
+            
+            if (amount && amount > 0) {
+                balance = balance + Number(amount);
+                updateBalance();
+                document.getElementById('income-amount').value = '';
+                alert('Доход добавлен!');
+            } else {
+                alert('Введите сумму');
+            }
+        }
+
+        // Обновление распределения
+        function updateDistribution() {
+            // Здесь пока просто показываем текущие проценты
+            alert('Распределение сохранено');
+        }
+
+        // Добавление долга
+        function addDebt() {
+            let name = document.getElementById('debt-name').value;
+            let amount = document.getElementById('debt-amount').value;
+            
+            if (name && amount && amount > 0) {
+                let debt = {
+                    id: Date.now(),
+                    name: name,
+                    amount: Number(amount),
+                    remaining: Number(amount)
+                };
+                
+                debts.push(debt);
+                updateDebtsList();
+                
+                document.getElementById('debt-name').value = '';
+                document.getElementById('debt-amount').value = '';
+            } else {
+                alert('Заполните все поля');
+            }
+        }
+
+        // Обновление списка долгов
+        function updateDebtsList() {
+            let list = document.getElementById('debts-list');
+            
+            if (debts.length === 0) {
+                list.innerHTML = 'Нет долгов';
+                return;
+            }
+            
+            let html = '';
+            for (let debt of debts) {
+                html += '<div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">';
+                html += '<p><strong>' + debt.name + '</strong></p>';
+                html += '<p>Долг: ' + formatMoney(debt.remaining) + '</p>';
+                html += '<button onclick="payDebt(' + debt.id + ')">Оплатить</button> ';
+                html += '<button onclick="deleteDebt(' + debt.id + ')" style="background:#f44336;">Удалить</button>';
+                html += '</div>';
+            }
+            
+            list.innerHTML = html;
+        }
+
+        // Оплата долга
+        function payDebt(id) {
+            let amount = prompt('Сколько платим?');
+            if (amount && amount > 0) {
+                for (let i = 0; i < debts.length; i++) {
+                    if (debts[i].id === id) {
+                        debts[i].remaining -= Number(amount);
+                        balance -= Number(amount);
+                        
+                        if (debts[i].remaining <= 0) {
+                            debts.splice(i, 1);
+                        }
+                        
+                        updateBalance();
+                        updateDebtsList();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Удаление долга
+        function deleteDebt(id) {
+            debts = debts.filter(debt => debt.id !== id);
+            updateDebtsList();
+        }
+
+        // Добавление инвестиции
+        function addInvestment() {
+            let name = document.getElementById('invest-name').value;
+            let amount = document.getElementById('invest-amount').value;
+            
+            if (name && amount && amount > 0) {
+                let invest = {
+                    id: Date.now(),
+                    name: name,
+                    amount: Number(amount)
+                };
+                
+                investments.push(invest);
+                updateInvestmentsList();
+                
+                document.getElementById('invest-name').value = '';
+                document.getElementById('invest-amount').value = '';
+            } else {
+                alert('Заполните все поля');
+            }
+        }
+
+        // Обновление списка инвестиций
+        function updateInvestmentsList() {
+            let list = document.getElementById('investments-list');
+            
+            if (investments.length === 0) {
+                list.innerHTML = 'Нет инвестиций';
+                return;
+            }
+            
+            let html = '';
+            for (let inv of investments) {
+                html += '<div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">';
+                html += '<p><strong>' + inv.name + '</strong></p>';
+                html += '<p>Сумма: ' + formatMoney(inv.amount) + '</p>';
+                html += '<button onclick="deleteInvestment(' + inv.id + ')" style="background:#f44336;">Удалить</button>';
+                html += '</div>';
+            }
+            
+            list.innerHTML = html;
+        }
+
+        // Удаление инвестиции
+        function deleteInvestment(id) {
+            investments = investments.filter(inv => inv.id !== id);
+            updateInvestmentsList();
+        }
+
+        // Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+    </script>
+</body>
+</html>
